@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Juan Paulo García</title>
+        <style>
+            :root{
+                /* ADJUST THESE VARIABLES to change layout/colors/typography */
+                /* Use a percentage for desktop (e.g. 28%) and optionally cap with --left-max */
+                --left-width:30%; /* width of the left column (percentage for desktop) */
+                --left-max:420px; /* optional cap so left column doesn't grow too large on very wide screens */
+                --left-offset:50px; /* space from viewport edges for floating effect */
+                --left-gap:48px; /* left-offset * 2 — added to .main margin-left so content clears the floating left card */
+                --left-radius:12px; /* rounded corners for the floating container */
+                --header-height:48px; /* height reserved for the fixed header */
+                --left-bottom:64px; /* space reserved at bottom to avoid overlap with language links */
+                --left-bg:#001733; /* left column background set to requested color */
+                --page-bg:#001733; 
+                --accent:#2b6cb0;
+                --main-pad:36px; /* padding used by .main (so header can reference it) */
+                --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            }
+            *{box-sizing:border-box}
+            html,body{  
+                height:100%;
+                margin:0;
+                font-family:var(--font-stack);
+                background-color:#001733; /* dark blue background behind the page */
+                overflow-y:auto; /* use page-level scrolling so scrollbar is on the right edge */
+                -webkit-overflow-scrolling:touch;
+            }
+
+            /* Card in center (was left column) */
+            .left{
+                position:fixed;
+                top:50%;
+                left:50%;
+                transform:translate(-50%, -50%);
+                /* 70% of the viewport width */
+                width:70vw;
+                max-width:1100px;
+                padding:18px 30px 24px;
+                background:var(--left-bg);
+                border-radius:16px;
+                max-height:calc(100vh - 140px);
+                overflow:auto; /* allow internal scrolling if content exceeds viewport */
+            }
+
+            .left h1{font-size:20px;margin:0 0 6px;color:#ffffff}
+            .left p{margin:6px 0;color:#ffffff}
+
+            h1{margin-top:0;font-size:22px;line-height:1.2; color: #ffffff;}
+
+            /* Make the main header fixed so it stays at the same height as the left column */
+            .main h1.page-title{
+                position:fixed;
+                top:var(--left-offset); /* fixed at the same height as the left column */
+                left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap)); /* start after left card */
+                right:var(--left-offset); /* keep same offset from right edge */
+                height:var(--header-height);
+                display:flex;
+                align-items:center;
+                justify-content:flex-end; /* text-align right behavior */
+                background:#001733; /* match page background for a clean overlay */
+                padding:0 12px;
+                margin:0;
+                color: #ffffff;
+                z-index:60;
+                border-radius:var(--left-radius); /* match left column */
+            }
+
+            /* Dropdown (CSS-only) */
+            .dropdown{
+                position:relative;
+                display:inline-block;
+            }
+            
+            .dropdown .drop-toggle{
+                color:inherit;
+                text-decoration:none;
+                cursor:pointer;
+            }
+
+            .dropdown .drop-toggle::after{
+                content:" ▾";
+                font-size:0.9em;
+                margin-left:4px;
+            }
+
+            .dropdown .drop-menu{
+                display:none;
+                position:absolute;
+                right:0;top:calc(100% + 2px);
+                background:#b6bbbe;
+                color:#ffffff;
+                border-radius:var(--left-radius);
+                box-shadow:0 6px 18px rgba(16,24,40,0.08);
+                border:1px solid rgba(0,0,0,0.06);
+                min-width:160px;
+                padding:6px 0;
+                z-index:30
+            }
+
+            .dropdown .drop-menu li{
+                list-style:none;
+            }
+
+            .dropdown .drop-menu a{
+                display:block;
+                padding:8px 12px;
+                color:var(--accent);
+                text-decoration:none;
+            }
+            
+            .dropdown .drop-menu a:hover{
+                background:#f1f5f9;
+            }
+            
+            .dropdown:hover .drop-menu,.dropdown:focus-within .drop-menu{
+                display:block} 
+
+            /* Avatar and column sizing: avatar will stretch to match bio height */
+            .left .avatar{
+                flex:0 0 auto;
+                display:flex;
+                align-items:stretch; /* stretch to the row height */
+                justify-content:center;
+                max-width:240px;
+            }
+            .left .avatar img{
+                height:100%;      /* fill the avatar container's height */
+                width:auto;       /* preserve aspect ratio */
+                display:block;
+                margin:0;
+                padding:0;
+                object-fit:cover;
+                border-radius:8px;
+                overflow:hidden;
+                max-width:240px;
+            }
+
+            .card-row{
+                display:flex;
+                gap:24px;
+                align-items:stretch; /* ensure avatar and bio match height */
+            }
+            .left .avatar{ flex:0 0 auto; display:flex; align-items:stretch }
+            .left .contacts{ flex:0 0 200px; display:flex; flex-direction:column; gap:8px; align-items:left; justify-content:center; text-align:left; font-size:15px; color:#333 }
+            .left .contacts p{ margin:0 }
+            .left .bio{ flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; }
+            .left h1, .left h2{ text-align:center; margin:6px 0 }
+
+            /* Small language links in normal flow */
+            .left .langs{
+                position:static;
+                margin-top:12px;
+                font-size:12px;
+                color:#ffffff;
+                text-align:center;
+                pointer-events:auto;
+            }
+            .left .langs a{color:var(--accent);text-decoration:none;margin:0 6px}
+            .left .langs a:hover{text-decoration:underline}
+
+            /* Paragraph wrapper with padding (left column) */
+            .p-wrap{
+                display:block;
+                padding:6px 10px; /* tighter padding so more fits */
+                margin:8px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:14px; /* fixed size to improve wrapping */
+                line-height:1.35;
+                hyphens:auto;
+            }
+
+            /* Paragraph wrapper for the main (right) column */
+            .r-wrap{
+                display:block;
+                padding:12px 16px;
+                margin:12px 0;
+                background:rgba(255,255,255,0.6);
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(12px, 1.6vh, 14px); /* slightly larger for main content */
+                line-height:1.45;
+                hyphens:auto;
+            }
+
+            /* Main area — reserve space for the fixed header and show content */
+            .main{
+                margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));
+                margin-right:var(--left-gap);
+                max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));
+                min-height:100vh;
+                padding:24px;
+                padding-top:calc(var(--header-height) + 8px);
+                display:block;
+            }
+
+            h1{margin-top:0;font-size:20px;line-height:1.2}
+
+
+
+            h2{margin-top:0;font-size:16px;line-height:1.2}
+
+            /* Responsive: small screens keep the card centered and narrower */
+            @media (max-width:720px){
+                .left{
+                    position:fixed;
+                    left:50%;
+                    top:20px;
+                    transform:translateX(-50%);
+                    width:calc(100% - 48px);
+                    max-width:720px;
+                    border-radius:12px;
+                    box-shadow:0 8px 20px rgba(16,24,40,0.08);
+                }
+                .card-row{ flex-direction:column; gap:12px; align-items:center }
+                .left .avatar{ flex:0 0 auto; width:96px; max-width:96px }
+                .left .avatar img{ width:96px; height:96px }
+                .left .contacts{ align-items:center; text-align:center }
+                .left .bio{ width:100% }
+                .left .langs{position:static;margin-top:12px;text-align:center}
+                .main{display:none}
+            }
+        </style>
+    </head>
+    <body>
+        <aside class="left">
+            <h1>Juan Paulo García</h1>
+
+            <div class="card-row">
+                <div class="avatar">
+                    <img src="images/pfp.jpg" alt="Foto de Juan Paulo" />
+                </div>
+
+                <div class="contacts" aria-label="contactos">
+                    <p><strong>Location</strong><br>Bogota, Colombia</p>
+                    <p><strong>Phone</strong><br>+52 320 477 5171</p>
+                    <p><strong>Social Media<br><a href="https://www.instagram.com/jugarfloficial/">@jugarfloficial</a></p></strong>
+                </div>
+
+                <div class="bio">
+                    <p class="p-wrap" align="justify">is a specialist and researcher in the development of skills and abilities aimed at integrating soccer and life. He is the founder and Head coach of Club Jugar FL, President of the Bogotá Soccer Coaches Association and lecturer. He has dedicated his life to teaching soccer, promoting sports competition between organizations and clubs in Colombia, Aruba, and Argentina. His work stands out for his vision and training philosophy, leaving a lasting impact and providing players with the tools and experiences necessary to compete and grow as soccer players and human beings.</p>
+                </div>
+            </div>
+
+            <div class="langs" aria-label="Language links">
+                <a href="Spanish.html">Español</a> · <a href="English.html">English</a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <h1 class="page-title"><a href="Spanish.html">CV</a> · <a href="jugarfl.html">Club Jugar FL</a>  ·  <span class="dropdown" aria-haspopup="true">
+                <span class="drop-toggle" role="button" tabindex="0">Galería</span>
+                <ul class="drop-menu" role="menu" aria-label="Galería sub menu">
+                    <li role="none"><a role="menuitem" href="galeria_aruba.html">Aruba</a></li>
+                    <li role="none"><a role="menuitem" href="galeria_argentina.html">Argentina</a></li>
+                </ul>
+            </span>  ·  <a href="blog.html">Blog</a> </h1>
+        </main>
+
+
+    </body>
+</html>

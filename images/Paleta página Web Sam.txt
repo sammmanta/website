@@ -1,0 +1,22 @@
+Paleta página Web Sam:
+
+Azul de fondo del escudo: #00abff o rgb(0, 171, 255)
+
+Azul balón: #004f80 o rgb(0, 79, 128)
+
+Blanco azulado: #e7ffff o rgb(231, 255, 255)
+
+Azul oscuro borde: #001733 o rgb(0, 23, 51)
+
+Completed:
+index: check
+Spanish: Check
+English: Check
+jugarfl: Check
+jugarfl_eng: Check
+galeria_argentina: Check
+galeria_argentina_eng: Check
+galería_aruba: Check
+galeria_aruba_eng: Check
+blog: Check
+blog_eng: Check

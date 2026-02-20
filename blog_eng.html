@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Juan Paulo García</title>
+        <style>
+            :root{
+                /* ADJUST THESE VARIABLES to change layout/colors/typography */
+                /* Use a percentage for desktop (e.g. 28%) and optionally cap with --left-max */
+                --left-width:30%; /* width of the left column (kept at ~20%) */
+                --left-max:400px; /* optional cap so left column doesn't grow too large on very wide screens */
+                --left-offset:18px; /* space from viewport edges (nudged) */
+                --left-gap:30px; /* a touch more gap for breathing space */
+                --left-radius:12px; /* rounded corners for the floating container */
+                --header-height:48px; /* height reserved for the fixed header (reduced) */
+                --left-bottom:64px; /* space reserved at bottom to avoid overlap with language links */
+                --left-bg:#001733; /* left column background set to requested color */
+                --page-bg:#001733; 
+                --accent:#2b6cb0;
+                --main-pad:36px; /* padding used by .main (so header can reference it) */
+                --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            }
+            *{box-sizing:border-box}
+            html,body{  
+                height:100%;
+                margin:0;
+                font-family:var(--font-stack);
+                background-color:#001733; /* dark blue background behind the page */
+                overflow-y:auto; /* use page-level scrolling so scrollbar is on the right edge */
+                -webkit-overflow-scrolling:touch;
+            }
+
+            /* Left (fixed, non-scrollable) — now appears as a floating container */
+            .left{
+                position:fixed;
+                top:var(--left-offset);
+                left:var(--left-offset);
+                bottom:var(--left-offset);
+                background-color:#001733;
+                width:min(var(--left-width), var(--left-max));
+                padding:20px 18px var(--left-bottom);
+                border-radius:var(--left-radius);
+                border:1px solid rgba(0,0,0,0.06);
+                overflow:hidden; /* prevent scrolling — we will make text smaller so it fits */
+            }
+
+            .left h1{font-size:20px;margin:0 0 6px}
+            .left p{margin:6px 0;color:#333}
+            .left .p-wrap{color:#ffffff}
+
+            /* Profile image: larger circular avatar with outer margin */
+            .left img{
+                width:100%;
+                max-width:300px;
+                padding:0; /* no inner padding */
+                box-sizing:border-box;
+                display:block;
+                margin:8px auto; /* smaller outer margin */
+                object-fit:cover;
+                overflow:hidden;
+            }
+            /* Extra-large screens: make avatar even bigger */
+            @media (min-width:1200px){
+                .left img{ width:300px; height:300px; margin:12px auto; }
+            }
+
+            /* Small language links pinned to the bottom of the left container */
+            .left .langs{
+                position:absolute;
+                bottom:12px;
+                left:24px;
+                right:24px;
+                font-size:12px;
+                color:#ffffff;
+                text-align:center;
+                z-index:5;
+                pointer-events:auto;
+            }
+            .left .langs a{color:var(--accent);text-decoration:none;margin:0 6px}
+            .left .langs a:hover{text-decoration:underline}
+
+            /* Paragraph wrapper with padding (left column) */
+            .p-wrap{
+                display:block;
+                padding:6px 10px; /* tighter padding so more fits */
+                margin:6px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(11px, 1.1vw, 13px); /* desktop: 11–13px */
+                color:#ffffff;
+                line-height:1.35;
+            }
+
+            .p-wrap-handle{
+                display:block;
+                padding:6px 10px;
+                margin:6px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(13px, 1.1vw, 15px);
+                line-height:1.35;
+                font-weight:700;
+                hyphens:auto;
+            }
+
+            /* Paragraph wrapper for the main (right) column */
+            .r-wrap{
+                display:block;
+                padding:10px 10px;
+                margin:10px 15%;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(14px, 1.4vh, 15px); /* slightly smaller to fit better */
+                line-height:1.45;
+                color: #ffffff;
+                hyphens:auto;
+            }
+
+            /* Main (uses page scrolling) */
+            .main{
+                /* margin-left must match the left column width; include offset so floating card doesn't overlap */
+                margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));
+                margin-right:var(--left-gap); /* smaller right margin */
+                max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2))); /* prevent horizontal overflow */
+                min-height:100vh; /* ensure it fills viewport */
+                padding:24px;
+                padding-top:calc(var(--header-height) + 8px); /* ensure content is visible under fixed header */
+            }
+
+            h1{margin-top:0;font-size:22px;line-height:1.2; color: #ffffff;}
+
+            /* Make the main header fixed so it stays at the same height as the left column */
+            .main h1.page-title{
+                position:fixed;
+                top:var(--left-offset); /* fixed at the same height as the left column */
+                left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap)); /* start after left card */
+                right:var(--left-offset); /* keep same offset from right edge */
+                height:var(--header-height);
+                display:flex;
+                align-items:center;
+                justify-content:flex-end; /* text-align right behavior */
+                background:#001733; /* match page background for a clean overlay */
+                padding:0 12px;
+                margin:0;
+                color: #ffffff;
+                z-index:60;
+                border:1px solid rgba(0,0,0,0.04);
+                border-radius:var(--left-radius); /* match left column */
+                box-shadow:0 4px 14px rgba(16,24,40,0.04);
+            }
+
+            /* Dropdown (CSS-only) */
+            .dropdown{position:relative;display:inline-block}
+            .dropdown .drop-toggle{color:inherit;text-decoration:none;cursor:pointer}
+            .dropdown .drop-toggle::after{content:" ▾";font-size:0.9em;margin-left:4px}
+            .dropdown .drop-menu{display:none;position:absolute;right:0;top:calc(100% + 2px);background:#b6bbbe;color:#ffffff;border-radius:var(--left-radius);box-shadow:0 6px 18px rgba(16,24,40,0.08);border:1px solid rgba(0,0,0,0.06);min-width:160px;padding:6px 0;z-index:30}
+            .dropdown .drop-menu li{list-style:none}
+            .dropdown .drop-menu a{display:block;padding:8px 12px;color:var(--accent);text-decoration:none}
+            .dropdown .drop-menu a:hover{background:#e6edf3}
+            .dropdown:hover .drop-menu,.dropdown:focus-within .drop-menu{display:block} 
+
+            /* Responsive: stack columns on narrow screens */
+            @media (max-width:720px){
+                .left{
+                    position:relative;
+                    left:auto;
+                    top:auto;
+                    bottom:auto;
+                    width:min(var(--left-width), var(--left-max));
+                    height:auto;
+                    padding-bottom:18px;
+                    border-right:none;
+                    border-bottom:1px solid #e6edf3;
+                    border-radius:0;
+                    box-shadow:none;
+                    overflow:visible;
+                }
+                .left .langs{position:static;margin-top:12px;text-align:left}
+                .left img{ width:128px; height:128px; border-radius:50%; padding:0; margin:8px auto; box-sizing:border-box; }
+                /* mobile: keep left margin so the narrow left card doesn't overlap content */
+                .main{margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));margin-right:6%;max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));height:auto}
+            }
+
+            /* On small screens the left column stacks — let the header flow normally rather than sticking */
+            @media (max-width:720px){
+                .main h1.page-title{ position:static; top:auto; margin:12px 0; }
+                .main{ padding-top:24px; }
+            }
+
+            h2{margin-top:0;font-size:16px;line-height:1.2}
+
+            /* Responsive: stack columns on narrow screens */
+            @media (max-width:720px){
+                .left{
+                    position:relative;
+                    left:auto;
+                    top:auto;
+                    bottom:auto;
+                    width:min(var(--left-width), var(--left-max));
+                    height:auto;
+                    padding-bottom:18px;
+                    border-right:none;
+                    border-bottom:1px solid #e6edf3;
+                    border-radius:0;
+                    box-shadow:none;
+                    overflow:visible;
+                }
+                .left .langs{position:static;margin-top:12px;text-align:left}
+                .left img{ width:128px; height:128px; padding:0; margin:8px auto; box-sizing:border-box; border-radius:50%; }
+                /* mobile: keep left margin so the narrow left card doesn't overlap content */
+                .main{margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));margin-right:6%;max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));height:auto}
+            }
+        </style>
+    </head>
+    <body>
+        <aside class="left">
+            <img src="images/pfp.jpg" alt="Foto de Juan Paulo" />
+            <br>
+            <p class="p-wrap" align="justify">Juan Paulo García is a specialist and researcher in the development of skills and abilities aimed at integrating soccer and life. He is the founder and Head coach of Club Jugar FL, President of the Bogotá Soccer Coaches Association and lecturer. He has dedicated his life to teaching soccer, promoting sports competition between organizations and clubs in Colombia, Aruba, and Argentina. His work stands out for his vision and training philosophy, leaving a lasting impact and providing players with the tools and experiences necessary to compete and grow as soccer players and human beings.</p>
+            <p class="p-wrap-handle" align="justify"><a href="https://www.instagram.com/jugarfloficial/">@jugarfloficial</a></p>
+            <div class="langs" aria-label="Language links">
+                <a href="blog.html">Español</a> · <a href="blog_eng.html">English</a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <h1 class="page-title"><a href="English.html">CV</a> ·  <a href="jugarfl_eng.html">Club Jugar FL</a>  ·  <span class="dropdown" aria-haspopup="true">
+                <span class="drop-toggle" role="button" tabindex="0">Gallery</span>
+                <ul class="drop-menu" role="menu" aria-label="Gallery sub menu">
+                    <li role="none"><a role="menuitem" href="galeria_aruba_eng.html">Aruba</a></li>
+                    <li role="none"><a role="menuitem" href="galeria_argentina_eng.html">Argentina</a></li>
+                </ul>
+            </span>  ·  Blog</h1>
+            <br>
+            <br>
+            <br>
+            <br>
+            <section>
+                <h1>Skills and abilities come first —Before technique and tactics</h1>
+                <p class="r-wrap" align="justify">“The best skill we can learn as children is the skill of learning.”
+                </p>
+                <p class="r-wrap" align="justify">By Juan Paulo García
+                <br>Written by Samanta García
+                </p>
+                <p class="r-wrap" align="justify">Part I</p>
+                <p class="r-wrap" align="justify">How does the attitude of learning influence the way we play soccer?</p>
+                <p class="r-wrap" align="justify">Skills and abilities are pillars in the development of an integrated physicality; they are part of both sports training and everyday life. We need to ask ourselves where soccer training is failing these days and how we can learn the art of learning.</p>
+                <p class="r-wrap" align="justify">Foremost, I would like to emphasize that I am referring to skills and abilities, not only as the capacity to perform a task effectively, but also as the convergence of fundamental values in the process of teaching and reinforcing what has been learned throughout an athlete's career. The ability to learn is a hidden capacity waiting to be awakened and to face the unknown, the new.</p>
+                <p class="r-wrap" align="justify">Nowadays, self-knowledge and the learning process are often relegated in the pursuit of results, so we completely forget that human beings, who are always learning, must recognize themselves, know which of their strengths help them to be more effective in any learning process, especially when we talk about playing soccer.</p>
+                <p class="r-wrap" align="justify">Skills and abilities are not only equivalent to innate talent, but also to the environment and context. In other words, they are not outside the player's reality. It is thanks to the difficulties and adversities that life itself offers that skills and abilities become a treasure that players can awaken and strengthen in training.</p>
+                <p class="r-wrap" align="justify">In this sense, skills and abilities attack several fronts: physical, mental, and attitudinal. The path of learning is not a straight line; it is full of mistakes that are part of the finesse of learning fully, with a proactive attitude beyond following guidelines.</p>
+                <p class="r-wrap" align="justify">Skills and abilities, ultimately, are capacities that make a player stand out for their own autonomy, as they develop resourcefulness and enthusiasm for learning conscientiously with an open and willing mind.</p>
+                <p class="r-wrap" align="justify">I firmly believe in a creative and holistic methodology, enriched by the practice of sport and life. I make these reflections because I have witnessed and guided the learning processes of numerous children and adolescents, each with their own expectations, challenges, and strengths. Likewise, I make these reflections because I recognize the limitations of time and space that athletes and coaches face today.</p>
+            </section>
+
+        </main>
+    </body>
+</html>

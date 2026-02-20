@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Juan Paulo García</title>
+        <style>
+            :root{
+                /* ADJUST THESE VARIABLES to change layout/colors/typography */
+                /* Use a percentage for desktop (e.g. 28%) and optionally cap with --left-max */
+                --left-width:30%; /* width of the left column (kept at ~20%) */
+                --left-max:400px; /* optional cap so left column doesn't grow too large on very wide screens */
+                --left-offset:18px; /* space from viewport edges (nudged) */
+                --left-gap:30px; /* a touch more gap for breathing space */
+                --left-radius:12px; /* rounded corners for the floating container */
+                --header-height:48px; /* height reserved for the fixed header (reduced) */
+                --left-bottom:64px; /* space reserved at bottom to avoid overlap with language links */
+                --left-bg:#001733; /* left column background set to requested color */
+                --page-bg:#001733; 
+                --accent:#2b6cb0;
+                --main-pad:36px; /* padding used by .main (so header can reference it) */
+                --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            }
+            *{box-sizing:border-box}
+            html,body{  
+                height:100%;
+                margin:0;
+                font-family:var(--font-stack);
+                background-color:#001733; /* dark blue background behind the page */
+                overflow-y:auto; /* use page-level scrolling so scrollbar is on the right edge */
+                -webkit-overflow-scrolling:touch;
+            }
+
+            /* Left (fixed, non-scrollable) — now appears as a floating container */
+            .left{
+                position:fixed;
+                top:var(--left-offset);
+                left:var(--left-offset);
+                bottom:var(--left-offset);
+                background-color:#001733;
+                width:min(var(--left-width), var(--left-max));
+                padding:20px 18px var(--left-bottom);
+                border-radius:var(--left-radius);
+                border:1px solid rgba(0,0,0,0.06);
+                overflow:hidden; /* prevent scrolling — we will make text smaller so it fits */
+            }
+
+            .left h1{font-size:20px;margin:0 0 6px}
+            .left p{margin:6px 0;color:#333}
+            .left .p-wrap{color:#ffffff}
+
+            /* Profile image: larger circular avatar with outer margin */
+            .left img{
+                width:100%;
+                max-width:300px;
+                padding:0; /* no inner padding */
+                box-sizing:border-box;
+                display:block;
+                margin:8px auto; /* smaller outer margin */
+                object-fit:cover;
+                overflow:hidden;
+            }
+            /* Extra-large screens: make avatar even bigger */
+            @media (min-width:1200px){
+                .left img{ width:300px; height:300px; margin:12px auto; }
+            }
+
+            /* Small language links pinned to the bottom of the left container */
+            .left .langs{
+                position:absolute;
+                bottom:12px;
+                left:24px;
+                right:24px;
+                font-size:12px;
+                color:#ffffff;
+                text-align:center;
+                z-index:5;
+                pointer-events:auto;
+            }
+            .left .langs a{color:var(--accent);text-decoration:none;margin:0 6px}
+            .left .langs a:hover{text-decoration:underline}
+
+            /* Paragraph wrapper with padding (left column) */
+            .p-wrap{
+                display:block;
+                padding:6px 10px; /* tighter padding so more fits */
+                margin:6px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(11px, 1.1vw, 13px); /* desktop: 11–13px */
+                color:#ffffff;
+                line-height:1.35;
+            }
+
+            .p-wrap-handle{
+                display:block;
+                padding:6px 10px;
+                margin:6px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(13px, 1.1vw, 15px);
+                line-height:1.35;
+                font-weight:700;
+                hyphens:auto;
+            }
+
+            /* Paragraph wrapper for the main (right) column */
+            .r-wrap{
+                display:block;
+                padding:10px 14px;
+                margin:10px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(14px, 1.4vh, 15px); /* slightly smaller to fit better */
+                line-height:1.45;
+                color: #ffffff;
+                hyphens:auto;
+            }
+
+            /* Main (uses page scrolling) */
+            .main{
+                /* margin-left must match the left column width; include offset so floating card doesn't overlap */
+                margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));
+                margin-right:var(--left-gap); /* smaller right margin */
+                max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2))); /* prevent horizontal overflow */
+                min-height:100vh; /* ensure it fills viewport */
+                padding:24px;
+                padding-top:calc(var(--header-height) + 8px); /* ensure content is visible under fixed header */
+            }
+
+            h1{margin-top:0;font-size:22px;line-height:1.2; color: #ffffff;}
+
+            /* Make the main header fixed so it stays at the same height as the left column */
+            .main h1.page-title{
+                position:fixed;
+                top:var(--left-offset); /* fixed at the same height as the left column */
+                left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap)); /* start after left card */
+                right:var(--left-offset); /* keep same offset from right edge */
+                height:var(--header-height);
+                display:flex;
+                align-items:center;
+                justify-content:flex-end; /* text-align right behavior */
+                background:#001733; /* match page background for a clean overlay */
+                padding:0 12px;
+                margin:0;
+                color: #ffffff;
+                z-index:60;
+                border:1px solid rgba(0,0,0,0.04);
+                border-radius:var(--left-radius); /* match left column */
+                box-shadow:0 4px 14px rgba(16,24,40,0.04);
+            }
+
+            /* Dropdown (CSS-only) */
+            .dropdown{position:relative;display:inline-block}
+            .dropdown .drop-toggle{color:inherit;text-decoration:none;cursor:pointer}
+            .dropdown .drop-toggle::after{content:" ▾";font-size:0.9em;margin-left:4px}
+            .dropdown .drop-menu{display:none;position:absolute;right:0;top:calc(100% + 2px);background:#b6bbbe;color:#ffffff;border-radius:var(--left-radius);box-shadow:0 6px 18px rgba(16,24,40,0.08);border:1px solid rgba(0,0,0,0.06);min-width:160px;padding:6px 0;z-index:30}
+            .dropdown .drop-menu li{list-style:none}
+            .dropdown .drop-menu a{display:block;padding:8px 12px;color:var(--accent);text-decoration:none}
+            .dropdown .drop-menu a:hover{background:#e6edf3}
+            .dropdown:hover .drop-menu,.dropdown:focus-within .drop-menu{display:block} 
+
+            /* Responsive: stack columns on narrow screens */
+            @media (max-width:720px){
+                .left{
+                    position:relative;
+                    left:auto;
+                    top:auto;
+                    bottom:auto;
+                    width:min(var(--left-width), var(--left-max));
+                    height:auto;
+                    padding-bottom:18px;
+                    border-right:none;
+                    border-bottom:1px solid #e6edf3;
+                    border-radius:0;
+                    box-shadow:none;
+                    overflow:visible;
+                }
+                .left .langs{position:static;margin-top:12px;text-align:left}
+                .left img{ width:128px; height:128px; border-radius:50%; padding:0; margin:8px auto; box-sizing:border-box; }
+                /* mobile: keep left margin so the narrow left card doesn't overlap content */
+                .main{margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));margin-right:6%;max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));height:auto}
+            }
+
+            /* On small screens the left column stacks — let the header flow normally rather than sticking */
+            @media (max-width:720px){
+                .main h1.page-title{ position:static; top:auto; margin:12px 0; }
+                .main{ padding-top:24px; }
+            }
+
+            h2{margin-top:0;font-size:16px;line-height:1.2}
+
+            /* Responsive: stack columns on narrow screens */
+            @media (max-width:720px){
+                .left{
+                    position:relative;
+                    left:auto;
+                    top:auto;
+                    bottom:auto;
+                    width:min(var(--left-width), var(--left-max));
+                    height:auto;
+                    padding-bottom:18px;
+                    border-right:none;
+                    border-bottom:1px solid #e6edf3;
+                    border-radius:0;
+                    box-shadow:none;
+                    overflow:visible;
+                }
+                .left .langs{position:static;margin-top:12px;text-align:left}
+                .left img{ width:128px; height:128px; padding:0; margin:8px auto; box-sizing:border-box; border-radius:50%; }
+                /* mobile: keep left margin so the narrow left card doesn't overlap content */
+                .main{margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));margin-right:6%;max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));height:auto}
+            }
+        </style>
+    </head>
+    <body>
+        <aside class="left">
+            <img src="images/pfp.jpg" alt="Foto de Juan Paulo" />
+            <br>
+            <p class="p-wrap" align="justify">Juan Paulo García is a specialist and researcher in the development of skills and abilities aimed at integrating soccer and life. He is the founder and Head coach of Club Jugar FL, President of the Bogotá Soccer Coaches Association and lecturer. He has dedicated his life to teaching soccer, promoting sports competition between organizations and clubs in Colombia, Aruba, and Argentina. His work stands out for his vision and training philosophy, leaving a lasting impact and providing players with the tools and experiences necessary to compete and grow as soccer players and human beings.</p>
+            <p class="p-wrap-handle" align="justify"><a href="https://www.instagram.com/jugarfloficial/">@jugarfloficial</a></p>
+            <div class="langs" aria-label="Language links">
+                <a href="spanish.html">Español</a> · <a href="English.html">English</a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <h1 class="page-title">CV·  <a href="jugarfl_eng.html">Club Jugar FL</a>  ·  <span class="dropdown" aria-haspopup="true">
+                <span class="drop-toggle" role="button" tabindex="0">Gallery</span>
+                <ul class="drop-menu" role="menu" aria-label="Gallery sub menu">
+                    <li role="none"><a role="menuitem" href="galeria_aruba_eng.html">Aruba</a></li>
+                    <li role="none"><a role="menuitem" href="galeria_argentina_eng.html">Argentina</a></li>
+                </ul>
+            </span>  ·  <a href="blog_eng.html">Blog</a> </h1>
+            <br>
+            <br>
+            <br>
+            <br>
+            <section>
+                <h1>CERTIFICATIONS</h1>
+                <p class="r-wrap"><strong>FIFA Coaching License C</strong> (Approved)</p>
+                <p class="r-wrap"><strong>Professional Sports Coach Card</strong> [Colombia] 2025</p>
+                <p class="r-wrap"><strong>Fundamentals of Sports Management</strong> Colombian Ministry of Sports. 2025</p>
+            </section>
+            <br>
+            <section>
+                <h1>CAREER</h1>
+                <p class="r-wrap"><strong>Head Coach, Director of Methodology and President of Club Jugar F.L.</strong> 2010–present
+                <br>· Training women/men, aged 4 to 23. 
+                <br>· Leads Teams in national and international competitions including Bogotá Soccer League</p>
+                <p class="r-wrap"><strong>Bogotá Soccer Coaches Association</strong> 2007–ptresent
+                <br>· President and vice president. Responsible for promoting, training, development, and professionalization of the Bogotá soccer coaches in Bogotá</p>
+                <p class="r-wrap"><strong>Aruba International Tournament</strong> 1999–2015
+                <br>· Acquired extensive experience leading Colombian teams across 16 editions of the ‘Himno y Bandera’ International Tournament. U-13 and U-20
+                <p class="r-wrap"><strong>Apuestas Monserrate Soccer’s Club</strong>
+                <br>Head Coach and Director of Methodology in national and international competitions, actively contributing more than 20 years of experience since 1989:
+                <br>Head coach:
+                <br>· Olaya Mayores Hexagonal Tournament [1992, 1993, 1995, 1996, 2003, 2004, 2005, 2022, 2023] Youth [1990, 1999, 2000, 2001, 2007, 2008]
+                <br>· First C National Tournament [1994]
+                <br>· Southeast Hexagonal Tournament [1997, 2011, 2013, 2017]
+                <br>· North Hexagonal Tournament [2005, 2006]
+                <br>· Southeast Hexagonal Tournament [1997, 2011, 2013, 2017]
+                <br>· Lifutbol Bogotá Tournament [2011, 2000, 1999]
+                <br>· Future Stars Tournament [1994, 1995, 1997] Youth [1997, 1998]
+                <br>· Colombian Armed Forces National Tournament [1999]
+                <br>· Founder of the San Andrés Islands Sovereignty Cup Tournament [2002-2004]
+                <br>· Director of Soccer Training Methodology for Youth
+                <br>· 6 years as Administrative Delegate and Manager</p>
+                <p class="r-wrap"><strong>Ombudsman Office of Bogotá</strong> 2017–2018
+                <br>· Head coach and responsible for training the officials at Colombian government organization</p>
+                <p class="r-wrap"><strong>Competitions Argentina</strong> 2010–2012
+                <br>· Head coach and Co-founder of Soccer for all Tournament. Necochea. U-23
+                <br>· Head coach and Co-founder of the Argentine International Quadrangular Tournament. Buenos Aires U-23</p>
+                <p class="r-wrap"><strong>Javeriana University</strong> 2001–2003
+                <br>· Head coach of the Faculty of Theology soccer team</p>
+                <p class="r-wrap"><strong>Colombian Armed Forces League</strong> 1999
+                <br>· Head coach of the Colombian Armed Forces Federation U-20</p>
+                <p class="r-wrap"><strong>USA - Salvador Competitions</strong> 1997–1999
+                <br>· Head coach. Banco Cuztatlan National Teams Tournament. U-15
+                <br>· Independence Cup, Long Island, NY. USA. U-23</p>
+                <p class="r-wrap"><strong>Caprecom - Colseguros Insurance</strong> 1993–1999
+                <br>· Head Coach and Director of Methodology for boys and girls aged 4 to 17</p>
+            </section>
+            <br>
+            <section>
+                <h1>LECTURER</h1>
+                <p class="r-wrap"><strong>Skills and abilities come before technique and tactics.</strong>. 
+                <br>· 2025, Choachí Colombia</p>
+                <p class="r-wrap"><strong>The importance of technique and creativity in the soccer development of children.</strong>. 
+                <br>· 2019. Aruba </p>
+                <p class="r-wrap"><strong>Technique-based training exercises for children and young people aged 10 to 15.</strong>. 
+                <br>· 2004. San Andrés, Colombia</p>
+            </section>
+            <br>
+            <section>
+                <h1>OTHER ROLES</h1>
+                <p class="r-wrap"><strong>Uniforms and equipment</strong>
+                <br>· Design and produced soccer uniforms, custom design of decorative inflatables for tournaments and sporting events</p>
+            </section>
+            <br>
+            <section>
+                <h1>SKILLS</h1>
+                <p class="r-wrap">
+                <strong>
+                    leadership and group coordination
+                    <br>Innovative vision
+                    <br>Research methodology
+                    <br>Mentoring and training of emerging coaches
+                    <br>Project management
+                    <br>Comprehensive vision of teaching soccer for life
+                    <br>Holistic philosophy: body-mind-attitude
+                </strong>
+                </p>
+            </section>
+
+        </main>
+    </body>
+</html>

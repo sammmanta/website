@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Juan Paulo García</title>
+        <style>
+            :root{
+                /* ADJUST THESE VARIABLES to change layout/colors/typography */
+                /* Use a percentage for desktop (e.g. 28%) and optionally cap with --left-max */
+                --left-width:30%; /* width of the left column (kept at ~20%) */
+                --left-max:400px; /* optional cap so left column doesn't grow too large on very wide screens */
+                --left-offset:18px; /* space from viewport edges (nudged) */
+                --left-gap:30px; /* a touch more gap for breathing space */
+                --left-radius:12px; /* rounded corners for the floating container */
+                --header-height:48px; /* height reserved for the fixed header (reduced) */
+                --left-bottom:64px; /* space reserved at bottom to avoid overlap with language links */
+                --left-bg:#001733; /* left column background set to requested color */
+                --page-bg:#001733; 
+                --accent:#2b6cb0;
+                --main-pad:36px; /* padding used by .main (so header can reference it) */
+                --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            }
+            *{box-sizing:border-box}
+            html,body{  
+                height:100%;
+                margin:0;
+                font-family:var(--font-stack);
+                background-color:#001733; /* dark blue background behind the page */
+                overflow-y:auto; /* use page-level scrolling so scrollbar is on the right edge */
+                -webkit-overflow-scrolling:touch;
+            }
+
+            /* Left (fixed, non-scrollable) — now appears as a floating container */
+            .left{
+                position:fixed;
+                top:var(--left-offset);
+                left:var(--left-offset);
+                bottom:var(--left-offset);
+                background-color:#001733;
+                width:min(var(--left-width), var(--left-max));
+                padding:20px 18px var(--left-bottom);
+                border-radius:var(--left-radius);
+                overflow:hidden; /* prevent scrolling — we will make text smaller so it fits */
+            }
+
+            .left h1{font-size:20px;margin:0 0 6px}
+            .left p{margin:6px 0;color:#333}
+            .left .p-wrap{color:#ffffff}
+
+            /* Profile image: larger circular avatar with outer margin */
+            .left img{
+                width:100%;
+                max-width:300px;
+                padding:0; /* no inner padding */
+                box-sizing:border-box;
+                display:block;
+                margin:8px auto; /* smaller outer margin */
+                object-fit:cover;
+                overflow:hidden;
+            }
+            /* Extra-large screens: make avatar even bigger */
+            @media (min-width:1200px){
+                .left img{ width:300px; height:300px; margin:12px auto; }
+            }
+
+            /* Small language links pinned to the bottom of the left container */
+            .left .langs{
+                position:absolute;
+                bottom:12px;
+                left:24px;
+                right:24px;
+                font-size:12px;
+                color:#ffffff;
+                text-align:center;
+                z-index:5;
+                pointer-events:auto;
+            }
+            .left .langs a{color:var(--accent);text-decoration:none;margin:0 6px}
+            .left .langs a:hover{text-decoration:underline}
+
+            /* Paragraph wrapper with padding (left column) */
+            .p-wrap{
+                display:block;
+                padding:6px 10px; /* tighter padding so more fits */
+                margin:6px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(11px, 1.1vw, 13px); /* desktop: 11–13px */
+                color:#ffffff;
+                line-height:1.35;
+            }
+
+            .p-wrap-handle{
+                display:block;
+                padding:6px 10px;
+                margin:6px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(13px, 1.1vw, 15px);
+                line-height:1.35;
+                font-weight:700;
+                hyphens:auto;
+            }
+
+            /* Paragraph wrapper for the main (right) column */
+            .r-wrap{
+                display:block;
+                padding:10px 14px;
+                margin:10px 0;
+                border-radius:6px;
+                overflow-wrap:break-word;
+                word-break:break-word;
+                font-size:clamp(14px, 1.4vh, 15px); /* slightly smaller to fit better */
+                line-height:1.45;
+                color: #ffffff;
+                hyphens:auto;
+            }
+
+            /* Main (uses page scrolling) */
+            .main{
+                /* margin-left must match the left column width; include offset so floating card doesn't overlap */
+                margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));
+                margin-right:var(--left-gap); /* smaller right margin */
+                max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2))); /* prevent horizontal overflow */
+                min-height:100vh; /* ensure it fills viewport */
+                padding:24px;
+                padding-top:calc(var(--header-height) + 8px); /* ensure content is visible under fixed header */
+            }
+
+            h1{margin-top:0;font-size:22px;line-height:1.2; color:#ffffff;}
+
+            /* Make the main header fixed so it stays at the same height as the left column */
+            .main h1.page-title{
+                position:fixed;
+                top:var(--left-offset); /* fixed at the same height as the left column */
+                left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap)); /* start after left card */
+                right:var(--left-offset); /* keep same offset from right edge */
+                height:var(--header-height);
+                display:flex;
+                align-items:center;
+                justify-content:flex-end; /* text-align right behavior */
+                background:#001733; /* match page background for a clean overlay */
+                padding:0 12px;
+                margin:0;
+                color: #ffffff;
+                z-index:60;
+            }
+
+            /* Dropdown (CSS-only) */
+            .dropdown{position:relative;display:inline-block}
+            .dropdown .drop-toggle{color:inherit;text-decoration:none;cursor:pointer}
+            .dropdown .drop-toggle::after{content:" ▾";font-size:0.9em;margin-left:4px}
+            .dropdown .drop-menu{display:none;position:absolute;right:0;top:calc(100% + 2px);background:#b6bbbe;color:#ffffff;border-radius:var(--left-radius);box-shadow:0 6px 18px rgba(16,24,40,0.08);border:1px solid rgba(0,0,0,0.06);min-width:160px;padding:6px 0;z-index:30}
+            .dropdown .drop-menu li{list-style:none}
+            .dropdown .drop-menu a{display:block;padding:8px 12px;color:var(--accent);text-decoration:none}
+            .dropdown .drop-menu a:hover{background:#e6edf3}
+            .dropdown:hover .drop-menu,.dropdown:focus-within .drop-menu{display:block} 
+
+            /* Responsive: stack columns on narrow screens */
+            @media (max-width:720px){
+                .left{
+                    position:relative;
+                    left:auto;
+                    top:auto;
+                    bottom:auto;
+                    width:min(var(--left-width), var(--left-max));
+                    height:auto;
+                    padding-bottom:18px;
+                    border-right:none;
+                    border-bottom:1px solid #e6edf3;
+                    border-radius:0;
+                    box-shadow:none;
+                    overflow:visible;
+                }
+                .left .langs{position:static;margin-top:12px;text-align:left}
+                .left img{ width:128px; height:128px; border-radius:50%; padding:0; margin:8px auto; box-sizing:border-box; }
+                /* mobile: keep left margin so the narrow left card doesn't overlap content */
+                .main{margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));margin-right:6%;max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));height:auto}
+            }
+
+            /* On small screens the left column stacks — let the header flow normally rather than sticking */
+            @media (max-width:720px){
+                .main h1.page-title{ position:static; top:auto; margin:12px 0; }
+                .main{ padding-top:24px; }
+            }
+
+            h2{margin-top:0;font-size:16px;line-height:1.2}
+
+            /* Responsive: stack columns on narrow screens */
+            @media (max-width:720px){
+                .left{
+                    position:relative;
+                    left:auto;
+                    top:auto;
+                    bottom:auto;
+                    width:min(var(--left-width), var(--left-max));
+                    height:auto;
+                    padding-bottom:18px;
+                    border-right:none;
+                    border-bottom:1px solid #e6edf3;
+                    border-radius:0;
+                    box-shadow:none;
+                    overflow:visible;
+                }
+                .left .langs{position:static;margin-top:12px;text-align:left}
+                .left img{ width:128px; height:128px; padding:0; margin:8px auto; box-sizing:border-box; border-radius:50%; }
+                /* mobile: keep left margin so the narrow left card doesn't overlap content */
+                .main{margin-left:calc(min(var(--left-width), var(--left-max)) + var(--left-gap));margin-right:6%;max-width:calc(100% - (min(var(--left-width), var(--left-max)) + calc(var(--left-gap) * 2)));height:auto}
+            }
+
+            .gallery-grid{
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); /* larger cards */
+                gap:8px; /* tighter spacing for denser layout */
+                margin-top:10px;
+            }
+            .img-card{
+                border-radius:var(--left-radius);
+                overflow:hidden;
+                transition:transform .18s ease, box-shadow .18s ease;
+            }
+            /* Media container centers images preserving their aspect ratio */
+            .img-card{display:flex;flex-direction:column}
+            .img-card picture{display:flex;align-items:center;justify-content:center;min-height:180px}
+            @media(min-width:900px){ .img-card picture{min-height:260px} }
+            .img-card img{
+                max-width:100%;
+                height:auto;
+                display:block;
+                margin:0 auto; /* center horizontally */
+                max-height:1000px; /* increased cap for bigger cards */
+            }
+            .img-card figcaption{font-size:15px;color:#222;padding:14px 12px;text-align:center;background:rgba(255,255,255,0.95)}
+            .img-card:hover{transform:translateY(-10px);box-shadow:0 28px 50px rgba(16,24,40,0.14)}
+
+            /* Lightbox / modal for viewing images */
+            .lightbox{
+                position:fixed;
+                inset:0;
+                display:none;
+                align-items:center;
+                justify-content:center;
+                background:rgba(0,0,0,0.6);
+                z-index:9999;
+                transition:opacity .18s ease;
+            }
+            .lightbox.open{display:flex;opacity:1}
+            /* Inner area has extra bottom padding and becomes scrollable if needed so images/captions don't get cropped */
+            .lightbox .inner{
+                max-width:90vw;
+                max-height:90vh;
+                padding:20px 16px 28px; /* extra bottom padding */
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                gap:12px;
+                overflow:auto;
+            }
+            /* Fade-in and gentle scale for image transitions */
+            .lightbox img{
+                max-width:100%;
+                max-height:calc(90vh - 140px); /* leave room for padding + caption */
+                display:block;
+                border-radius:8px;
+                opacity:0;
+                transform:scale(0.98);
+                transition:opacity .28s ease, transform .28s ease;
+            }
+            .lightbox img.loaded{opacity:1;transform:scale(1)}
+            .lightbox .caption{margin-top:0;color:#fff;text-align:center;font-size:15px;padding-bottom:8px}
+            .lightbox .close{position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.95);border-radius:50%;border:none;width:36px;height:36px;cursor:pointer;font-size:18px;line-height:1}
+            .lightbox .close:focus{outline:2px solid var(--accent);box-shadow:0 0 0 3px rgba(43,108,176,0.12)}
+            .lightbox .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.96);border:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;box-shadow:0 6px 18px rgba(16,24,40,0.12);z-index:10000}
+            .lightbox .nav.prev{left:12px}
+            .lightbox .nav.next{right:12px}
+            .lightbox .nav:focus{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(43,108,176,0.12)}
+            @media (max-width:720px){ .lightbox .nav{width:40px;height:40px;font-size:18px;left:8px;right:8px} }
+        </style>
+    </head>
+    <body>
+        <aside class="left">
+            <img src="images/pfp.jpg" alt="Foto de Juan Paulo" />
+            <br>
+            <p class="p-wrap" align="justify">Juan Paulo García is a specialist and researcher in the development of skills and abilities aimed at integrating soccer and life. He is the founder and Head coach of Club Jugar FL, President of the Bogotá Soccer Coaches Association and lecturer. He has dedicated his life to teaching soccer, promoting sports competition between organizations and clubs in Colombia, Aruba, and Argentina. His work stands out for his vision and training philosophy, leaving a lasting impact and providing players with the tools and experiences necessary to compete and grow as soccer players and human beings.</p>
+            <p class="p-wrap-handle" align="justify"><a href="https://www.instagram.com/jugarfloficial/">@jugarfloficial</a></p>
+            <div class="langs" aria-label="Language links">
+                <a href="galeria_argentina.html">Español</a> · <a href="galeria_argentina_eng.html">English</a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <h1 class="page-title"><a href="English.html">CV</a> ·  <a href="jugarfl_eng.html">Club Jugar FL</a>  ·  <span class="dropdown" aria-haspopup="true">
+                <span class="drop-toggle" role="button" tabindex="0">Gallery</span>
+                <ul class="drop-menu" role="menu" aria-label="Galería sub menu">
+                    <li role="none"><a role="menuitem" href="galeria_aruba_eng.html">Aruba</a></li>
+                    <li role="none"><a role="menuitem" href="galeria_argentina_eng.html">Argentina</a></li>
+                </ul>
+            </span>  ·  <a href="blog_eng.html">Blog</a> </h1>
+            <br>
+            <br>
+            <br>
+            <section>
+                <h1>Argentina</h1>
+                <div class="gallery-grid">
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar1.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar2.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar3.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar4.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar5.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar6.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar7.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar8.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar9.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar10.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar11.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar12.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                    <figure class="img-card">
+                        <picture>
+                            <img src="images/ar13.jpg" alt="Argentina" loading="lazy" />
+                        </picture>
+                    </figure>
+                </div>
+            </section>
+
+            <div class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+            <button class="close" aria-label="Cerrar">×</button>
+            <button class="nav prev" aria-label="Anterior">‹</button>
+            <button class="nav next" aria-label="Siguiente">›</button>
+            <div class="inner" role="document">
+                <img src="" alt="" />
+                <div class="caption" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <script>
+            // Lightbox with fade animation, keyboard and swipe navigation
+            (function(){
+                const lb = document.querySelector('.lightbox');
+                if(!lb) return;
+                const lbImg = lb.querySelector('img');
+                const lbCaption = lb.querySelector('.caption');
+                const closeBtn = lb.querySelector('.close');
+                const thumbs = Array.from(document.querySelectorAll('.img-card img'));
+                const prevBtn = lb.querySelector('.nav.prev');
+                const nextBtn = lb.querySelector('.nav.next');
+                if(prevBtn && nextBtn){
+                    if(thumbs.length <= 1){ prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; }
+                }
+                if(!thumbs.length) return;
+
+                let idx = -1;
+                const threshold = 50; // px for swipe
+
+                function showAt(i){
+                    idx = (i + thumbs.length) % thumbs.length;
+                    const src = thumbs[idx].currentSrc || thumbs[idx].src;
+                    const alt = thumbs[idx].alt || '';
+                    const caption = thumbs[idx].closest('figure')?.querySelector('figcaption')?.textContent || '';
+
+                    lb.classList.add('open');
+                    lb.setAttribute('aria-hidden','false');
+                    document.documentElement.style.overflow = 'hidden';
+
+                    lbImg.classList.remove('loaded');
+                    // change src (will trigger load)
+                    lbImg.src = src;
+                    lbImg.alt = alt;
+                    lbCaption.textContent = caption;
+
+                    // when image is loaded, show with fade
+                    lbImg.onload = function(){
+                        lbImg.classList.add('loaded');
+                        // preload next
+                        const pre = new Image();
+                        pre.src = thumbs[(idx+1) % thumbs.length].currentSrc || thumbs[(idx+1) % thumbs.length].src;
+                    };
+
+                    // focus close for accessibility
+                    closeBtn.focus();
+                }
+
+                function openAt(i){ showAt(i); }
+                function closeLightbox(){
+                    lb.classList.remove('open');
+                    lb.setAttribute('aria-hidden','true');
+                    lbImg.src = '';
+                    lbCaption.textContent = '';
+                    document.documentElement.style.overflow = '';
+                    idx = -1;
+                }
+
+                // Click thumbnails
+                thumbs.forEach((img, i) => {
+                    img.style.cursor = 'zoom-in';
+                    img.addEventListener('click', () => openAt(i));
+                    img.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') openAt(i); });
+                });
+
+                // Close events
+                closeBtn.addEventListener('click', closeLightbox);
+                lb.addEventListener('click', (e)=>{ if(e.target === lb) closeLightbox(); });
+                // Prev/Next buttons
+                if(prevBtn) prevBtn.addEventListener('click', (e)=>{ e.stopPropagation(); showAt(idx-1); });
+                if(nextBtn) nextBtn.addEventListener('click', (e)=>{ e.stopPropagation(); showAt(idx+1); });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e)=>{
+                    if(!lb.classList.contains('open')) return;
+                    if(e.key === 'Escape') closeLightbox();
+                    if(e.key === 'ArrowRight') showAt(idx+1);
+                    if(e.key === 'ArrowLeft') showAt(idx-1);
+                });
+
+                // Swipe / drag navigation
+                let startX = 0, startY = 0, isDown = false;
+
+                function pointerStart(x,y){ startX = x; startY = y; isDown = true; }
+                function pointerEnd(x,y){
+                    if(!isDown) return; isDown = false;
+                    const dx = x - startX;
+                    const dy = y - startY;
+                    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold){
+                        if(dx < 0) showAt(idx+1); else showAt(idx-1);
+                    }
+                }
+
+                // touch events
+                lb.addEventListener('touchstart', (e)=>{ const t = e.touches[0]; pointerStart(t.clientX, t.clientY); });
+                lb.addEventListener('touchend', (e)=>{ const t = e.changedTouches[0]; pointerEnd(t.clientX, t.clientY); });
+
+                // mouse drag (desktop)
+                lb.addEventListener('mousedown', (e)=>{ pointerStart(e.clientX, e.clientY); });
+                document.addEventListener('mouseup', (e)=>{ pointerEnd(e.clientX, e.clientY); });
+
+                // Prevent accidental text selection during drag
+                lb.addEventListener('dragstart', (e)=> e.preventDefault());
+            })();
+        </script>
+        </main>
+    </body>
+</html>
